@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crylink - Web Quản Lí</title>
+    <style>
+        :root {
+            --bg: #060b1a;
+            --card: rgba(15, 25, 55, 0.55);
+            --border: rgba(80, 140, 210, 0.25);
+            --accent: #3b82f6;
+            --text: #e2e8f0;
+            --text2: rgba(180, 200, 230, 0.6);
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --gold: #fbbf24;
+            --r: 14px;
+            --t: all 0.3s ease;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(160deg, #060b1e, #0b1035, #080d28);
+            min-height: 100vh;
+            color: var(--text);
+        }
+        .admin-header {
+            background: rgba(10, 20, 45, 0.78);
+            backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .admin-header h1 {
+            font-size: 23px;
+            font-weight: 800;
+        }
+        .admin-header h1 span {
+            color: var(--accent);
+        }
+        .admin-header p {
+            color: var(--text2);
+            font-size: 11px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--t);
+            letter-spacing: 0.5px;
+        }
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.18);
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(30, 80, 200, 0.35);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: 11px;
+            border-radius: 7px;
+        }
+        .admin-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 22px;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .menu-card {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r);
+            padding: 24px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--t);
+            position: relative;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(100, 160, 220, 0.5);
+            box-shadow: 0 16px 32px rgba(30, 80, 200, 0.2);
+        }
+        .menu-card .card-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        .menu-card .card-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .menu-card .badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 15px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            display: none;
+            animation: fadeInUp 0.45s ease;
+        }
+        .panel.active {
+            display: block;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .panel h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+        .section-subtitle {
+            color: var(--text2);
+            font-size: 12px;
+            margin-bottom: 22px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text2);
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: var(--t);
+            font-family: inherit;
+            resize: vertical;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(50, 130, 220, 0.2);
+        }
+        .form-group select option {
+            background: #1a1f3a;
+            color: #fff;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+        th {
+            text-align: left;
+            padding: 13px 14px;
+            background: rgba(50, 130, 220, 0.1);
+            color: #93c5fd;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 45px 20px;
+            color: var(--text2);
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .tag-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .tag-approved {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .tag-rejected {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .toast-container {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 12px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.4s ease, slideOut 0.4s ease 2.6s forwards;
+            max-width: 360px;
+        }
+        .toast-success {
+            background: rgba(34, 197, 94, 0.85);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        .toast-error {
+            background: rgba(239, 68, 68, 0.85);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        .toast-info {
+            background: rgba(59, 130, 246, 0.85);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(60px); }
+        }
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .admin-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .panel {
+                padding: 20px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 160, 220, 0.35);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div>
+            <h1>C<span>ry</span>link</h1>
+            <p>WEB QUẢN LÍ</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline" onclick="window.location.href='index.html'">🌐 Về Web Chính</button>
+            <button class="btn btn-outline" onclick="refreshAll()">🔄 Làm mới</button>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="menu-grid">
+            <div class="menu-card" onclick="showPanel('addLink')">
+                <div class="card-icon">🔗</div>
+                <div class="card-title">Thêm link</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('linkList')">
+                <div class="card-icon">📋</div>
+                <div class="card-title">Danh sách link</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('userList')">
+                <div class="card-icon">👥</div>
+                <div class="card-title">Người dùng</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('notif')">
+                <div class="card-icon">📢</div>
+                <div class="card-title">Thông báo</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('approveLink')" id="appLinkCard">
+                <div class="card-icon">✅</div>
+                <div class="card-title">Duyệt link</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('approveWD')" id="appWDCard">
+                <div class="card-icon">💰</div>
+                <div class="card-title">Duyệt rút tiền</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('approvePhone')" id="appPhoneCard">
+                <div class="card-icon">📱</div>
+                <div class="card-title">Duyệt SĐT</div>
+            </div>
+            <div class="menu-card" onclick="showPanel('approve4G')">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Duyệt 4G</div>
+            </div>
+        </div>
+
+        <!-- Panel Thêm link -->
+        <div class="panel" id="panelAddLink">
+            <h2>🔗 Thêm link mới</h2>
+            <p class="section-subtitle">Hỗ trợ 2 link cho mỗi thẻ</p>
+            <div class="form-row">
+                <div class="form-group"><label>Tên link</label><input type="text" id="linkName" placeholder="VD: Xem video"></div>
+                <div class="form-group"><label>Tiền thưởng (VNĐ)</label><input type="text" id="linkReward" value="300" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+            </div>
+            <div class="form-group"><label>Đường dẫn Link 1 (bắt buộc)</label><input type="url" id="linkUrl" placeholder="https://..."></div>
+            <div class="form-group"><label>Đường dẫn Link 2 (tùy chọn)</label><input type="url" id="linkUrl2" placeholder="Để trống nếu không có"></div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="saveLink()">💾 Lưu link</button>
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- Panel Danh sách link -->
+        <div class="panel" id="panelLinkList">
+            <h2>📋 Danh sách link</h2>
+            <div class="table-wrapper" id="linkTable"></div>
+            <div class="form-actions">
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- Panel Người dùng -->
+        <div class="panel" id="panelUserList">
+            <h2>👥 Người dùng</h2>
+            <div class="table-wrapper" id="userTable"></div>
+            <div class="form-actions">
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- Panel Thông báo -->
+        <div class="panel" id="panelNotif">
+            <h2>📢 Gửi thông báo</h2>
+            <p style="color:var(--text2);margin-bottom:20px;">Gửi thông báo đến tất cả người dùng</p>
+            <div class="form-group">
+                <label>Nội dung thông báo</label>
+                <textarea id="notifMsg" rows="4" placeholder="Nhập nội dung thông báo..."></textarea>
+            </div>
+            <div class="form-actions" style="margin-bottom:30px;">
+                <button class="btn btn-primary" onclick="sendNotif()">📤 Gửi thông báo</button>
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+
+            <h3 style="margin-top:20px; margin-bottom:15px; color: var(--text);">📋 Lịch sử thông báo đã gửi</h3>
+            <div class="table-wrapper" id="notifHistoryTable">
+                <div class="empty-state">Đang tải...</div>
+            </div>
+        </div>
+
+        <!-- Panel Duyệt link -->
+        <div class="panel" id="panelApproveLink">
+            <h2>✅ Duyệt link</h2>
+            <div class="table-wrapper" id="appLinkTable"></div>
+            <div class="form-actions">
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- Panel Duyệt rút tiền -->
+        <div class="panel" id="panelApproveWD">
+            <h2>💰 Duyệt rút tiền</h2>
+            <div class="table-wrapper" id="appWDTable"></div>
+            <div class="form-actions">
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- Panel Duyệt SĐT -->
+        <div class="panel" id="panelApprovePhone">
+            <h2>📱 Duyệt SĐT</h2>
+            <div class="table-wrapper" id="appPhoneTable"></div>
+            <div class="form-actions">
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- Panel Duyệt 4G -->
+        <div class="panel" id="panelApprove4G">
+            <h2>⚡ Duyệt 4G</h2>
+            <div class="form-group">
+                <label>Gmail tài khoản</label>
+                <input type="email" id="email4G" placeholder="Nhập Gmail...">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-success" onclick="approve4G()">✅ Duyệt</button>
+                <button class="btn btn-outline" onclick="hideAll()">← Quay lại</button>
+            </div>
+            <div style="margin-top:20px;">
+                <div class="table-wrapper" id="list4GTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ===== DATABASE KEYS =====
+        const DB = {
+            USERS: 'cl_u',
+            LINKS: 'cl_l',
+            SUBS: 'cl_s',
+            REJ: 'cl_r',
+            NOTIF: 'cl_n',
+            WITHDRAW: 'cl_w',
+            WALLETS: 'cl_wl',
+            LINKHIST: 'cl_lh',
+            USERS4G: 'cl_4g',
+            PHONEVERIFY: 'cl_pv'
+        };
+
+        function g(k) { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } }
+        function s(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+        function fmt(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+        function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+        function toast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`;
+            t.textContent = msg;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // ===== PANEL MANAGEMENT =====
+        function showPanel(name) {
+            hideAll();
+            const map = {
+                addLink: 'panelAddLink',
+                linkList: 'panelLinkList',
+                userList: 'panelUserList',
+                notif: 'panelNotif',
+                approveLink: 'panelApproveLink',
+                approveWD: 'panelApproveWD',
+                approvePhone: 'panelApprovePhone',
+                approve4G: 'panelApprove4G'
+            };
+            const panelId = map[name];
+            if (panelId) {
+                document.getElementById(panelId).classList.add('active');
+                if (name === 'linkList') loadLinks();
+                if (name === 'userList') loadUsers();
+                if (name === 'notif') loadNotifHistory();
+                if (name === 'approveLink') loadAppLink();
+                if (name === 'approveWD') loadAppWD();
+                if (name === 'approvePhone') loadAppPhone();
+                if (name === 'approve4G') load4G();
+            }
+            updateBadges();
+        }
+
+        function hideAll() {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        }
+
+        function refreshAll() {
+            const active = document.querySelector('.panel.active');
+            if (active) {
+                if (active.id === 'panelLinkList') loadLinks();
+                if (active.id === 'panelUserList') loadUsers();
+                if (active.id === 'panelNotif') loadNotifHistory();
+                if (active.id === 'panelApproveLink') loadAppLink();
+                if (active.id === 'panelApproveWD') loadAppWD();
+                if (active.id === 'panelApprovePhone') loadAppPhone();
+                if (active.id === 'panelApprove4G') load4G();
+            }
+            updateBadges();
+            toast('✅ Dữ liệu đã được làm mới!', 'success');
+        }
+
+        function updateBadges() {
+            updateBadge('appLinkCard', g(DB.SUBS).filter(s => s.status === 'pending').length);
+            updateBadge('appWDCard', g(DB.WITHDRAW).filter(w => w.status === 'pending').length);
+            updateBadge('appPhoneCard', g(DB.PHONEVERIFY).filter(p => p.status === 'pending').length);
+        }
+
+        function updateBadge(cardId, count) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+            const old = card.querySelector('.badge');
+            if (old) old.remove();
+            if (count > 0) {
+                const badge = document.createElement('div');
+                badge.className = 'badge';
+                badge.textContent = count;
+                card.appendChild(badge);
+            }
+        }
+
+        // ===== THÊM LINK =====
+        function saveLink() {
+            const name = document.getElementById('linkName').value.trim();
+            const url = document.getElementById('linkUrl').value.trim();
+            const url2 = document.getElementById('linkUrl2').value.trim();
+            const reward = parseInt(document.getElementById('linkReward').value) || 300;
+            if (!name || !url) { toast('⚠️ Vui lòng điền tên và Link 1!', 'error'); return; }
+            const links = g(DB.LINKS);
+            if (links.find(l => l.name.toLowerCase() === name.toLowerCase())) {
+                toast('⚠️ Tên link đã tồn tại!', 'error');
+                return;
+            }
+            links.push({ name, url, url2: url2 || null, reward, createdAt: new Date().toLocaleString('vi-VN') });
+            s(DB.LINKS, links);
+            document.getElementById('linkName').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkUrl2').value = '';
+            document.getElementById('linkReward').value = '300';
+            toast('✅ Link đã được thêm!', 'success');
+        }
+
+        // ===== DANH SÁCH LINK =====
+        function loadLinks() {
+            const links = g(DB.LINKS);
+            const wrapper = document.getElementById('linkTable');
+            if (links.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Chưa có link nào.</div>';
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>Tên</th><th>Link 1</th><th>Link 2</th><th>Thưởng</th><th>Ngày tạo</th><th>Xóa</th></tr></thead><tbody>`;
+            links.forEach((l, i) => {
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${esc(l.name)}</strong></td>
+                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${esc(l.url)}</td>
+                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">${esc(l.url2 || 'Trống')}</td>
+                    <td style="color:var(--gold);">+${fmt(l.reward || 300)}đ</td>
+                    <td>${esc(l.createdAt || '')}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="delLink(${i})">🗑</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+        }
+
+        function delLink(i) {
+            if (!confirm('Bạn có chắc muốn xóa link này?')) return;
+            const links = g(DB.LINKS);
+            links.splice(i, 1);
+            s(DB.LINKS, links);
+            loadLinks();
+            toast('🗑 Đã xóa link!', 'info');
+        }
+
+        // ===== NGƯỜI DÙNG =====
+        function loadUsers() {
+            const users = g(DB.USERS);
+            const wrapper = document.getElementById('userTable');
+            if (users.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Chưa có người dùng nào.</div>';
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>Tên</th><th>Gmail</th><th>Mật khẩu</th><th>Token</th><th>SĐT</th></tr></thead><tbody>`;
+            users.forEach((u, i) => {
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${esc(u.username)}</strong></td>
+                    <td>${esc(u.email)}</td>
+                    <td>${esc(u.password)}</td>
+                    <td style="font-size:10px;">${esc(u.token)}</td>
+                    <td>${esc(u.phone || 'Chưa XT')}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+        }
+
+        // ===== THÔNG BÁO + LỊCH SỬ =====
+        function sendNotif() {
+            const msg = document.getElementById('notifMsg').value.trim();
+            if (!msg) {
+                toast('⚠️ Vui lòng nhập nội dung!', 'error');
+                return;
+            }
+            const notifs = g(DB.NOTIF);
+            notifs.push({
+                id: 'n_' + Date.now(),
+                targetEmail: 'all',
+                message: msg,
+                time: new Date().toLocaleString('vi-VN')
+            });
+            s(DB.NOTIF, notifs);
+            document.getElementById('notifMsg').value = '';
+            toast('✅ Đã gửi thông báo!', 'success');
+            loadNotifHistory();
+        }
+
+        function loadNotifHistory() {
+            const notifs = g(DB.NOTIF);
+            const wrapper = document.getElementById('notifHistoryTable');
+            if (notifs.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Chưa có thông báo nào.</div>';
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>Nội dung</th><th>Thời gian</th><th>Thao tác</th></tr></thead><tbody>`;
+            notifs.slice().reverse().forEach((n, i) => {
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${esc(n.message)}</td>
+                    <td>${esc(n.time)}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteNotif('${n.id}')">🗑 Xóa</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+        }
+
+        function deleteNotif(id) {
+            if (!confirm('Xóa thông báo này?')) return;
+            let notifs = g(DB.NOTIF);
+            notifs = notifs.filter(n => n.id !== id);
+            s(DB.NOTIF, notifs);
+            toast('🗑 Đã xóa thông báo!', 'info');
+            loadNotifHistory();
+        }
+
+        // ===== DUYỆT LINK =====
+        function loadAppLink() {
+            const subs = g(DB.SUBS).filter(s => s.status !== 'approved');
+            const wrapper = document.getElementById('appLinkTable');
+            if (subs.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Không có yêu cầu.</div>';
+                updateBadges();
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>User</th><th>Gmail</th><th>Link</th><th>Time</th><th>TT</th><th>HĐ</th></tr></thead><tbody>`;
+            subs.forEach((s, i) => {
+                const tag = s.status === 'pending' ? '<span class="tag tag-pending">Chờ</span>' : '<span class="tag tag-rejected">Từ chối</span>';
+                const act = s.status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="appSub('${esc(s.userEmail)}','${esc(s.linkName)}','${esc(s.time)}')">✅</button> <button class="btn btn-danger btn-sm" onclick="rejSub('${esc(s.userEmail)}','${esc(s.linkName)}','${esc(s.time)}')">❌</button>` : 'Đã XL';
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${esc(s.username)}</td>
+                    <td>${esc(s.userEmail)}</td>
+                    <td>${esc(s.linkName)}</td>
+                    <td>${esc(s.time)}</td>
+                    <td>${tag}</td>
+                    <td>${act}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+            updateBadges();
+        }
+
+        function appSub(email, linkName, time) {
+            const subs = g(DB.SUBS);
+            const idx = subs.findIndex(s => s.userEmail === email && s.linkName === linkName && s.time === time);
+            if (idx === -1) return;
+            subs[idx].status = 'approved';
+            s(DB.SUBS, subs);
+            const wallets = g(DB.WALLETS);
+            const w = wallets.find(x => x.email === email);
+            const links = g(DB.LINKS);
+            const link = links.find(l => linkName.startsWith(l.name));
+            const reward = link ? link.reward : 300;
+            if (w) {
+                w.balance = (w.balance || 0) + reward;
+                w.completedLinks = (w.completedLinks || 0) + 1;
+                s(DB.WALLETS, wallets);
+            }
+            const hist = g(DB.LINKHIST);
+            const hidx = hist.findIndex(h => h.userEmail === email && h.linkName === linkName && h.status === 'pending');
+            if (hidx !== -1) {
+                hist[hidx].status = 'approved';
+                s(DB.LINKHIST, hist);
+            }
+            loadAppLink();
+            toast(`✅ Đã duyệt! +${fmt(reward)}đ`, 'success');
+        }
+
+        function rejSub(email, linkName, time) {
+            if (!confirm('Từ chối yêu cầu này?')) return;
+            const subs = g(DB.SUBS);
+            const idx = subs.findIndex(s => s.userEmail === email && s.linkName === linkName && s.time === time);
+            if (idx !== -1) {
+                subs[idx].status = 'rejected';
+                s(DB.SUBS, subs);
+            }
+            const rej = g(DB.REJ);
+            rej.push({ userEmail: email, linkName: linkName.split(' (')[0] });
+            s(DB.REJ, rej);
+            loadAppLink();
+            toast('❌ Đã từ chối!', 'error');
+        }
+
+        // ===== DUYỆT RÚT TIỀN =====
+        function loadAppWD() {
+            const wds = g(DB.WITHDRAW).filter(w => w.status !== 'approved');
+            const wrapper = document.getElementById('appWDTable');
+            if (wds.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Không có yêu cầu.</div>';
+                updateBadges();
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>User</th><th>Loại</th><th>Tiền</th><th>Time</th><th>TT</th><th>HĐ</th></tr></thead><tbody>`;
+            wds.forEach((wd, i) => {
+                const tag = wd.status === 'pending' ? '<span class="tag tag-pending">Chờ</span>' : '<span class="tag tag-rejected">Từ chối</span>';
+                const act = wd.status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="showWD('${esc(wd.userEmail)}','${esc(wd.time)}')">🔍</button> <button class="btn btn-danger btn-sm" onclick="rejWD('${esc(wd.userEmail)}','${esc(wd.time)}')">❌</button>` : 'Đã XL';
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${esc(wd.username)}</td>
+                    <td>${wd.type === 'bank' ? '🏦' : '📱'}</td>
+                    <td style="color:var(--gold);">${fmt(wd.amount)}đ</td>
+                    <td>${esc(wd.time)}</td>
+                    <td>${tag}</td>
+                    <td>${act}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+            updateBadges();
+        }
+
+        function showWD(email, time) {
+            const wds = g(DB.WITHDRAW);
+            const wd = wds.find(x => x.userEmail === email && x.time === time);
+            if (!wd) return;
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:2000;display:flex;justify-content:center;align-items:center;';
+            modal.innerHTML = `
+                <div style="background:rgba(15,25,55,0.95);border-radius:18px;padding:28px;width:440px;max-width:90%;">
+                    <h3>💸 Duyệt rút tiền</h3>
+                    <p>User: <strong>${esc(wd.username)}</strong></p>
+                    <p>Tiền: <strong style="color:var(--gold);">${fmt(wd.amount)}đ</strong></p>
+                    ${wd.type === 'card' ? `
+                    <div class="form-group"><label>Seri thẻ</label><input id="mdSeri"></div>
+                    <div class="form-group"><label>Mã thẻ</label><input id="mdCode"></div>` : ''}
+                    <div class="form-group"><label>Ghi chú</label><textarea id="mdNote"></textarea></div>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-success" style="flex:1;" onclick="appWD('${esc(email)}','${esc(time)}')">✅ Duyệt</button>
+                        <button class="btn btn-outline" style="flex:1;" onclick="this.closest('div[style]').parentElement.remove()">Hủy</button>
+                    </div>
+                </div>`;
+            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+            document.body.appendChild(modal);
+        }
+
+        function appWD(email, time) {
+            const wds = g(DB.WITHDRAW);
+            const idx = wds.findIndex(w => w.userEmail === email && w.time === time);
+            if (idx === -1) return;
+            const wd = wds[idx];
+            const seri = document.getElementById('mdSeri') ? document.getElementById('mdSeri').value.trim() : '';
+            const code = document.getElementById('mdCode') ? document.getElementById('mdCode').value.trim() : '';
+            const note = document.getElementById('mdNote') ? document.getElementById('mdNote').value.trim() : '';
+            if (wd.type === 'card' && (!seri || !code)) {
+                toast('⚠️ Nhập Seri và Mã thẻ!', 'error');
+                return;
+            }
+            wd.status = 'approved';
+            wd.seri = seri;
+            wd.code = code;
+            wd.note = note;
+            s(DB.WITHDRAW, wds);
+            document.querySelectorAll('div[style*="z-index:2000"]').forEach(el => el.remove());
+            loadAppWD();
+            toast('✅ Đã duyệt!', 'success');
+        }
+
+        function rejWD(email, time) {
+            if (!confirm('Từ chối yêu cầu này?')) return;
+            const note = prompt('Ghi chú (tùy chọn):') || '';
+            const wds = g(DB.WITHDRAW);
+            const idx = wds.findIndex(w => w.userEmail === email && w.time === time);
+            if (idx === -1) return;
+            const wd = wds[idx];
+            const wallets = g(DB.WALLETS);
+            const w = wallets.find(x => x.email === email);
+            if (w) {
+                w.balance += wd.amount;
+                s(DB.WALLETS, wallets);
+            }
+            wd.status = 'rejected';
+            wd.note = note;
+            s(DB.WITHDRAW, wds);
+            loadAppWD();
+            toast('❌ Đã từ chối!', 'error');
+        }
+
+        // ===== DUYỆT SĐT =====
+        function loadAppPhone() {
+            const phones = g(DB.PHONEVERIFY).filter(p => p.status === 'pending');
+            const wrapper = document.getElementById('appPhoneTable');
+            if (phones.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Không có yêu cầu.</div>';
+                updateBadges();
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>Gmail</th><th>SĐT</th><th>HĐ</th></tr></thead><tbody>`;
+            phones.forEach((p, i) => {
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${esc(p.userEmail)}</td>
+                    <td>${esc(p.phone)}</td>
+                    <td><button class="btn btn-success btn-sm" onclick="appPhone('${esc(p.userEmail)}','${esc(p.phone)}','${esc(p.time)}')">✅</button> <button class="btn btn-danger btn-sm" onclick="rejPhone('${esc(p.userEmail)}','${esc(p.time)}')">❌</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+            updateBadges();
+        }
+
+        function appPhone(email, phone, time) {
+            const users = g(DB.USERS);
+            const u = users.find(x => x.email === email);
+            if (u) {
+                u.phone = phone;
+                s(DB.USERS, users);
+            }
+            const phones = g(DB.PHONEVERIFY);
+            const idx = phones.findIndex(p => p.userEmail === email && p.time === time);
+            if (idx !== -1) {
+                phones[idx].status = 'approved';
+                s(DB.PHONEVERIFY, phones);
+            }
+            loadAppPhone();
+            toast('✅ Đã duyệt SĐT!', 'success');
+        }
+
+        function rejPhone(email, time) {
+            if (!confirm('Từ chối?')) return;
+            const phones = g(DB.PHONEVERIFY);
+            const idx = phones.findIndex(p => p.userEmail === email && p.time === time);
+            if (idx !== -1) {
+                phones[idx].status = 'rejected';
+                s(DB.PHONEVERIFY, phones);
+            }
+            loadAppPhone();
+            toast('❌ Đã từ chối!', 'error');
+        }
+
+        // ===== DUYỆT 4G =====
+        function approve4G() {
+            const email = document.getElementById('email4G').value.trim();
+            if (!email) { toast('⚠️ Nhập Gmail!', 'error'); return; }
+            const list = g(DB.USERS4G);
+            if (list.includes(email)) { toast('⚠️ Đã có!', 'error'); return; }
+            list.push(email);
+            s(DB.USERS4G, list);
+            document.getElementById('email4G').value = '';
+            load4G();
+            toast('✅ Đã duyệt 4G!', 'success');
+        }
+
+        function load4G() {
+            const list = g(DB.USERS4G);
+            const wrapper = document.getElementById('list4GTable');
+            if (list.length === 0) {
+                wrapper.innerHTML = '<div class="empty-state">Chưa có tài khoản nào.</div>';
+                return;
+            }
+            let html = `<table><thead><tr><th>#</th><th>Gmail</th><th>Xóa</th></tr></thead><tbody>`;
+            list.forEach((e, i) => {
+                html += `<tr><td>${i + 1}</td><td>${esc(e)}</td><td><button class="btn btn-danger btn-sm" onclick="del4G(${i})">🗑</button></td></tr>`;
+            });
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+        }
+
+        function del4G(i) {
+            if (!confirm('Xóa?')) return;
+            const list = g(DB.USERS4G);
+            list.splice(i, 1);
+            s(DB.USERS4G, list);
+            load4G();
+            toast('🗑 Đã xóa!', 'info');
+        }
+
+        // ===== KHỞI TẠO =====
+        updateBadges();
+    </script>
+</body>
+</html>
