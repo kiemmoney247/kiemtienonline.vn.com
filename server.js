@@ -55,7 +55,7 @@ function taoToken() {
     return token;
 }
 
-// ===== ROUTES TRANG CHÍNH (đọc trực tiếp từ thư mục gốc, không dùng public) =====
+// ===== ROUTES TRANG CHÍNH =====
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -138,18 +138,24 @@ app.get('/api/link-vuot', (req, res) => {
     res.json(data.linkVuot || []);
 });
 
-// ===== API LÀM LINK =====
+// ===== API LÀM LINK (ĐÃ SỬA - lưu linkCreatedAt) =====
 app.post('/api/lam-link', (req, res) => {
     const { email, linkName, linkUrl } = req.body;
     const data = docDuLieu();
     const user = data.nguoiDung.find(u => u.email === email);
     if (!user) return res.json({ success: false, message: 'Không tìm thấy user.' });
+
+    // Tìm link để lấy createdAt
+    const link = data.linkVuot.find(l => linkName.startsWith(l.name));
+    const linkCreatedAt = link ? link.createdAt : '';
+
     data.lichSuLink.push({
         email, linkName, linkUrl,
         username: user.username,
         time: new Date().toLocaleString('vi-VN'),
         timestamp: Date.now(),
-        status: 'pending'
+        status: 'pending',
+        linkCreatedAt: linkCreatedAt
     });
     ghiDuLieu(data);
     res.json({ success: true });
@@ -207,14 +213,16 @@ app.get('/api/admin/data', (req, res) => {
     res.json(docDuLieu());
 });
 
-// ===== API ADMIN - THÊM LINK =====
+// ===== API ADMIN - THÊM LINK (ĐÃ SỬA - bỏ kiểm tra trùng tên) =====
 app.post('/api/admin/them-link', (req, res) => {
     const { name, url, url2, reward } = req.body;
     const data = docDuLieu();
-    if (data.linkVuot.find(l => l.name.toLowerCase() === name.toLowerCase())) {
-        return res.json({ success: false, message: 'Tên link đã tồn tại.' });
-    }
-    data.linkVuot.push({ name, url, url2: url2 || null, reward: parseInt(reward) || 300, createdAt: new Date().toLocaleString('vi-VN') });
+    // KHÔNG kiểm tra trùng tên nữa - cho phép tạo link trùng tên với createdAt mới
+    data.linkVuot.push({ 
+        name, url, url2: url2 || null, 
+        reward: parseInt(reward) || 300, 
+        createdAt: new Date().toLocaleString('vi-VN') 
+    });
     ghiDuLieu(data);
     res.json({ success: true });
 });
