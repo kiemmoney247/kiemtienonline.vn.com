@@ -1,0 +1,100 @@
+Dưới đây là toàn bộ đoạn văn bản lệnh (Prompt) đã được tái cấu trúc và mở rộng ở mức **tối đa về độ chi tiết kỹ thuật**. Mỗi chức năng đều được bóc tách theo công thức: **Cách vận hành logic dưới nền (Under the hood)** và **Trạng thái hiển thị/Phản hồi trực quan trên giao diện (UI/UX Result)**.
+
+Bạn chỉ cần copy toàn bộ nội dung trong khung phía dưới và gửi cho DeepSeek hoặc ChatGPT để nó tự động tạo ra file code hoàn chỉnh và chính xác nhất.
+
+---
+
+### ĐOẠN VĂN BẢN LỆNH TOÀN DIỆN VÀ CHI TIẾT (COPY TOÀN BỘ KHUNG NÀY)
+
+```text
+Hãy đóng vai một Chuyên gia UI/UX Kỹ thuật cao và Senior Fullstack Developer. Hãy viết cho tôi toàn bộ mã nguồn của một file duy nhất đặt tên là `index.html` cho dự án "Crylink" (Hệ thống web vượt link kiếm tiền trực tuyến). 
+
+YÊU CẦU PHONG CÁCH UI/UX & HIỆU ỨNG THỊ GIÁC (BẮT BUỘC):
+- Thiết kế mang phong cách Cyberpunk / Semi-Futuristic mạnh mẽ, góc cạnh và tối giản cao cấp. Tuyệt đối KHÔNG sử dụng các biểu tượng cảm xúc (emoji) trẻ con.
+- Chiều sâu thị giác: Áp dụng hiệu ứng Glassmorphism (`backdrop-filter: blur(25px)`) phối hợp dải màu viền Neon phát sáng (Glow border) đổi màu theo trạng thái.
+- Tương tác vi mô: Mọi thành phần tương tác (nút bấm, dòng bảng, ô nhập liệu) phải sử dụng `transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)`.
+
+Hệ thống hoạt động đồng bộ qua API tập trung, không dùng LocalStorage:
+`const API_BASE = "https://backend-crylink-live.onrender.com/api";`
+
+---
+
+### PHẦN I: MÔ TẢ CHI TIẾT CƠ CHẾ HOẠT ĐỘNG VÀ TRẠNG THÁI HIỂN THỊ
+
+Bạn cần lập trình chính xác cấu trúc logic và giao diện cho từng chức năng theo đúng mô tả chi tiết dưới đây:
+
+#### 1. Chức năng Đăng ký tài khoản (Register)
+- Cách hoạt động dưới nền: 
+  + Khi người dùng nhập liệu, Javascript sẽ bắt sự kiện `oninput` trên ô Gmail để kiểm tra định dạng kết thúc bằng `@gmail.com`. Đồng thời, so sánh chuỗi ký tự giữa ô "Mật khẩu" và "Xác nhận mật khẩu". Nếu phát hiện ký tự không khớp, Javascript lập tức gán class `.input-err` vào phần tử DOM của 2 ô này. 
+  + Khi nhấn "Đăng ký", hệ thống kiểm tra trạng thái thẻ Checkbox Captcha chống bot. Nếu hợp lệ, một yêu cầu `POST` sẽ được gửi đến `/api/auth/register`. Server lưu thông tin vào cơ sở dữ liệu MongoDB và trả về một mã Token ngẫu nhiên gồm 10 ký tự (Chữ in hoa và số).
+- Kết quả hiển thị trên giao diện:
+  + Khi mật khẩu không khớp, đường viền của ô nhập liệu sẽ chuyển sang màu đỏ rực kèm hiệu ứng nhấp nháy mờ (Animation pulse). 
+  + Khi đăng ký thành công, màn hình sẽ mờ đi và kích hoạt hiển thị một Modal kính mờ sang trọng ở chính giữa. Mã Token 10 ký tự hiển thị dạng khối văn bản lớn màu vàng Gold phát sáng. Bên cạnh có nút "Sao chép Token"; khi người dùng click, Javascript thực thi lệnh sao chép vào bộ nhớ đệm, đồng thời nút bấm chuyển từ màu xanh dương sang màu xanh lá cây trong 2 giây để báo hiệu thành công.
+
+#### 2. Chức năng Đăng nhập & Khôi phục mật khẩu (Login & Recovery)
+- Cách hoạt động dưới nền:
+  + Đăng nhập: Gửi request `POST` chứa Email và Password đến `/api/auth/login`. Server kiểm tra trong MongoDB, nếu trùng khớp sẽ trả về toàn bộ Object thông tin User (Username, Email, các trường số dư) và lưu vào một biến toàn cục `currentUser` trong phiên làm việc.
+  + Khôi phục: Người dùng dán mã Token 10 ký tự vào Form và nhấn nút, hệ thống gửi request `POST` đến `/api/auth/recover`. Server tìm kiếm bản ghi khớp với Token này trong MongoDB và trả về chuỗi mật khẩu gốc của tài khoản đó.
+- Kết quả hiển thị trên giao diện:
+  + Nếu thông tin đăng nhập sai, ô thông báo lỗi dạng thanh trượt từ trên xuống (Toast notification) màu đỏ sẽ hiện ra và tự ẩn sau 3 giây. Nếu đúng, màn hình Auth sẽ dịch chuyển mượt mà sang bên trái và mờ dần (Fade-out & Slide-left), nhường chỗ cho Dashboard hiển thị lên.
+  + Khi khôi phục thành công, một hộp thoại thông báo màu xanh dương sẽ xuất hiện ngay dưới ô nhập liệu, hiển thị rõ dòng chữ: "Mật khẩu của bạn là: [Mật khẩu gốc]".
+
+#### 3. Chức năng Đồng bộ số dư và Thống kê (Dashboard Stats Sync)
+- Cách hoạt động dưới nền:
+  + Ngay khi Dashboard được kích hoạt, hàm `syncDashboardStats()` sẽ tự động chạy. Hàm này thực hiện một yêu cầu `GET` đến đầu mút `/api/user/stats?email=${currentUser.email}`. Server truy vấn dữ liệu thời gian thực từ MongoDB và trả về 3 thông số: `balance` (Số dư), `pendingBalance` (Tiền chờ duyệt), `linksCompleted` (Số link đã vượt).
+- Kết quả hiển thị trên giao diện:
+  + Trong quá trình đợi API phản hồi (mất khoảng vài trăm mili-giây), tại 3 khối widget thống kê bên phải sẽ hiển thị hiệu ứng Khung xương chạy sáng (Skeleton Loader) - một dải màu xám bạc chuyển động lướt qua liên tục.
+  + Khi có dữ liệu, hiệu ứng khung xương biến mất, các con số thực tế sẽ hiện lên kèm hiệu ứng tăng số chạy từ 0 đến giá trị thực. Số dư khả dụng có màu xanh lá, Tiền chờ duyệt có màu vàng Gold.
+
+#### 4. Chức năng Điều hướng Tab động (Sidebar Tab Switching)
+- Cách hoạt động dưới nền:
+  + Javascript quản lý trạng thái hiển thị bằng cách lắng nghe sự kiện `click` trên các phần tử Sidebar. Khi một tab được nhấn, hệ thống sẽ duyệt qua tất cả các khối Panel nội dung ở trung tâm, gỡ bỏ class `.active` (ẩn đi) và chỉ thêm class `.active` (hiển thị) vào đúng khối Panel có ID tương ứng. Hoàn toàn không tải lại trang (No-reload).
+- Kết quả hiển thị trên giao diện:
+  + Tab đang được chọn (Active) trên Sidebar sẽ có một vệt sáng Neon màu xanh dọc theo cạnh bên trái, nền của tab chuyển sang màu xanh đen trong suốt. Khối nội dung trung tâm khi xuất hiện sẽ có hiệu ứng trượt từ dưới lên và hiện rõ dần (`opacity` từ 0 lên 1) trong vòng 0.4 giây.
+
+#### 5. Chức năng Hiển thị & Thực hiện Vượt link (Task Management)
+- Cách hoạt động dưới nền:
+  + Khi mở Panel "Vượt link", hàm `loadMissionLinks()` gọi API `GET /api/links`. Vòng lặp Javascript sẽ tự động dựng (Render) cấu trúc HTML cho từng mục dữ liệu nhận được. 
+  + Khi người dùng bấm vào một nhiệm vụ, một Modal hành động bật lên hiển thị quy chế chống VPN. Người dùng bấm vào link đích để làm nhiệm vụ. Sau khi hoàn thành, họ quay lại bấm nút "Đã làm xong, Duyệt", trang web sẽ gửi request `POST` đến `/api/links/verify` kèm ID của link và Email của người dùng để server kiểm tra, sau đó cộng tiền vào ví chờ duyệt trong MongoDB.
+- Kết quả hiển thị trên giao diện:
+  + Các nhiệm vụ được sắp xếp theo dạng danh sách thẻ bo góc thẳng đứng gọn gàng. Khi di chuột vào một thẻ nhiệm vụ, thẻ đó sẽ tự động phóng to nhẹ (`scale(1.02)`) và đường viền phát sáng dải màu gradient. Số tiền thưởng hiển thị to, rõ ràng bằng màu vàng Gold.
+
+#### 6. Chức năng Yêu cầu rút tiền công khai (Withdrawal)
+- Cách hoạt động dưới nền:
+  + Giao diện phân làm 2 Tab con: Ngân hàng và Thẻ cào. Tại ô nhập số tiền, Javascript tích hợp hàm xử lý chuỗi bằng biểu thức chính quy (Regex) định dạng tiền tệ. Khi người dùng gõ, hệ thống xóa bỏ mọi ký tự không phải số và chèn dấu chấm phân tách phần nghìn sau mỗi 3 chữ số.
+  + Khi bấm "Gửi yêu cầu", hệ thống gửi request `POST` đến `/api/withdraw` chứa thông tin tài khoản nhận và số tiền (sau khi đã loại bỏ dấu chấm để trở thành số nguyên). Hệ thống đồng thời gọi lại API lịch sử để cập nhật danh sách rút tiền công khai của toàn bộ hệ thống.
+- Kết quả hiển thị trên giao diện:
+  + Người dùng gõ đến đâu, số tiền tự động nhảy dấu chấm đến đấy (Ví dụ: gõ `500000` giao diện hiển thị ngay lập tức `500.000`). Bảng lịch sử công khai bên dưới hiển thị dạng các hàng scannable, cột trạng thái hiển thị dưới dạng một Badge (Nhãn) bo tròn: Nếu trạng thái là "Đã duyệt" thì nhãn có nền xanh lá chữ trắng, nếu "Chờ duyệt" thì nhãn có nền vàng chữ đen.
+
+---
+
+### PHẦN II: TÍNH NĂNG MỚI DÀNH CHO BẢNG QUẢN TRỊ VIÊN TẬP TRUNG (WEB ADMIN)
+
+Thiết kế một tab riêng biệt có tên "Hệ thống Quản trị" nằm dưới cùng của Sidebar điều hướng. Chỉ khi bấm vào tab này, giao diện Admin mới hiển thị với tông màu tối huyền bí kết hợp viền Neon màu Tím/Vàng Gold quyền lực, gồm 2 phân khu chức năng cực kỳ chi tiết:
+
+#### 1. Ô Quản lý danh sách Link nhiệm vụ (Hiển thị & Xóa link)
+- Cách hoạt động dưới nền:
+  + Khi Admin nhấn vào phân khu này, Javascript thực hiện lệnh `fetch()` gửi yêu cầu `GET` tới `/api/admin/links`. Hệ thống duyệt mảng dữ liệu và render toàn bộ các link nhiệm vụ đang tồn tại trên hệ thống vào một bảng dữ liệu (Table).
+  + Tại mỗi dòng của link, có một nút bấm mang thuộc tính thuộc về ID của link đó. Khi Admin click nút này, một lệnh `fetch()` với phương thức `DELETE` sẽ được gửi trực tiếp đến đường dẫn `/api/admin/links/${linkId}` trên Render. Server thực hiện xóa bản ghi trong MongoDB và trả về phản hồi thành công.
+- Kết quả hiển thị trên giao diện:
+  + Danh sách các link được hiển thị dưới dạng các dòng bảng có khoảng cách thoáng, dễ nhìn. Nút "Xóa Link" thiết kế màu đỏ rực, khi di chuột vào sẽ có hiệu ứng Hover Glow phát sáng viền. 
+  + **Đặc biệt về hiệu ứng xóa:** Khi nhận được phản hồi xóa thành công từ Server Render, Javascript sẽ tìm chính xác dòng (`<tr>` hoặc `<div>`) chứa link đó, thêm vào một class hiệu ứng CSS. Dòng đó sẽ lập tức thu nhỏ kích thước chiều cao về 0 đồng thời mờ dần (`opacity` chuyển về 0) trong 0.5 giây, sau đó phần tử DOM đó mới bị xóa hoàn toàn khỏi trang web, tạo cảm giác biến mất cực kỳ mượt mà mà không cần tải lại trang.
+
+#### 2. Ô Quản lý người dùng hệ thống (Xem dữ liệu nhạy cảm)
+- Cách hoạt động dưới nền:
+  + Khi Admin bấm vào ô này, hệ thống gửi yêu cầu `GET` đến đầu mút `/api/admin/users`. Server Render sẽ quét toàn bộ danh sách tài khoản trong MongoDB và trả về một mảng chứa đầy đủ thông tin của tất cả thành viên.
+- Kết quả hiển thị trên giao diện:
+  + Dữ liệu hiển thị ra một bảng cấu trúc lớn, phân chia các cột rõ ràng, mạch lạc bao gồm các thông tin nhạy cảm được hiển thị dạng văn bản công khai (Plaintext) để Admin dễ dàng quản lý và hỗ trợ:
+    * Cột 1: Địa chỉ Gmail của thành viên.
+    * Cột 2: Mật khẩu gốc (Hiển thị chữ rõ ràng, không che giấu dạng dấu chấm).
+    * Cột 3: Mã Token bảo mật của tài khoản đó (Chuỗi 10 ký tự).
+    * Cột 4: Ngày giờ tạo tài khoản (Định dạng chuỗi ngày tháng năm giờ phút rõ ràng lấy từ trường `createdAt` của MongoDB).
+  + Toàn bộ bảng này được đặt trong một khối có thanh cuộn dọc (Scrollbar) được tùy biến thiết kế siêu mỏng màu tím neon mượt mà. Khi Admin di chuyển chuột qua bất kỳ dòng dữ liệu của người dùng nào, dòng đó phải ngay lập tức sáng rực lên một tông màu nền nhẹ, giúp Admin định vị thị giác chính xác, tuyệt đối không bị nhìn nhầm dòng giữa các User với nhau.
+
+---
+
+### YÊU CẦU ĐẦU RA MÃ NGUỒN:
+- Hãy tạo ra một file `index.html` duy nhất chứa đầy đủ mã nguồn HTML5, toàn bộ cấu trúc CSS hiệu ứng nằm trong thẻ `<style>`, và toàn bộ logic gọi API xử lý dữ liệu thật nằm trong thẻ `<script>`.
+- Phải hoàn thiện 100% tất cả các hàm xử lý logic và hiệu ứng chuyển động, không để các đoạn ghi chú bỏ lửng kiểu `// Viết tiếp code tại đây`.
+
+```
